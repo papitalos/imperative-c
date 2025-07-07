@@ -72,28 +72,6 @@ imperative-c/
     └── imperative-c.vcxproj.filters # Project filters
 ```
 
-## 📊 Data Format
-
-### customer.txt
-```
-ID;Name;Phone;Age
-0001;Paulo Silva;123456789;52
-0003;Maria Joao Rodrigues;96543210;40
-```
-
-### activity.txt
-```
-ID;Date;Time;Activity;Duration;Distance;Unit
-0001;12-07-2022;10:55;Marcha;23;2;km
-0003;14-02-2022;11:33;Windsurfing;45;4;MN
-```
-
-### plan.txt
-```
-ID;StartDate;StartTime;EndDate;EndTime;Activity;Distance;Unit
-0001;01-01-2022;10h30;20-01-2022;11h45;Marcha;15;km
-```
-
 ## 🔧 Makefile Commands
 
 ```bash
@@ -129,45 +107,6 @@ make help      # Show all commands
 - Compatible input functions (`scanf` vs `scanf_s`)
 - Adaptive screen clearing (`clear` vs `cls`)
 
-## 🐛 Troubleshooting
 
-### Error: "GCC not found"
-```bash
-# macOS
-xcode-select --install
 
-# Verify installation
-gcc --version
-```
 
-### Error: "File not found"
-- Make sure you're in the project root directory
-- Verify that the `.txt` files exist in `imperative-c/`
-
-### Encoding Issues (Special Characters)
-- The program uses `setlocale(LC_ALL, "")` for accented character support
-- On Windows, configure terminal for UTF-8 if needed
-
-## 🚀 Usage Example
-
-1. Run the program: `./activities`
-2. Choose an option from the menu (1-4)
-3. Follow the on-screen instructions
-4. To exit, choose option 0
-
-### Example - Search Activity:
-```
-Enter activity name: Marcha
-Enter start date (dd/mm/yyyy): 01/01/2022
-Enter start time (hh:mm): 00:00
-Enter end date (dd/mm/yyyy): 31/12/2022
-Enter end time (hh:mm): 23:59
-```
-
-## 📝 Development Notes
-
-- Code optimized for cross-platform compatibility
-- Uses conditional macros for different operating systems
-- Automatic memory management
-- Data input validation
-- Multi-language interface support 
