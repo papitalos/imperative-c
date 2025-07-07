@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{4d039780-6e3f-4221-8dc2-570924b7336a}</ProjectGuid>
-    <RootNamespace>ProjetoImperativa</RootNamespace>
+    <RootNamespace>imperative-c</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

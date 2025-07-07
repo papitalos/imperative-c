@@ -1,23 +1,36 @@
-#define _CRT_SECURE_NO_WARNINGS
+// Cross-platform compatibility
+#ifdef _WIN32
+    #define _CRT_SECURE_NO_WARNINGS
+    #include <windows.h>
+    #define CLEAR_SCREEN "cls"
+    #define PAUSE_COMMAND "pause > nul"
+    #define SCANF_FUNC scanf_s
+#else
+    #include <unistd.h>
+    #define CLEAR_SCREEN "clear"
+    #define PAUSE_COMMAND "read -p 'Press Enter to continue...' dummy"
+    #define SCANF_FUNC scanf
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
 
-// Struct para guardar as informações da data
+// Struct to store date information
 typedef struct {
     int day;
     int month;
     int year;
 } Date;
 
-// Struct para guardar as informações do tempo
+// Struct to store time information
 typedef struct {
     int hour;
     int minute;
 } Time;
 
-// Struct para guardar as informações de customers
+// Struct to store customer information
 typedef struct {
     int id;
     char name[100];
@@ -25,7 +38,7 @@ typedef struct {
     int age;
 } Customer;
 
-// Struct para guardar as informações de atividades
+// Struct to store activity information
 typedef struct {
     int id;
     Date date;
@@ -51,20 +64,20 @@ typedef struct {
 
 
 
-// Function para abrir e ler o "customer.txt" file
+// Function to open and read the "customer.txt" file
 int ReadCustomerFile(char* filename, Customer* customers, int max_customers) {
-    // Abrir arquivo
+    // Open file
     FILE* customers_file = fopen(filename, "r");
     if (customers_file == NULL) {
         printf("Error opening customers file\n");
         return 0;
     }
 
-    // Ler as informações do customer
+    // Read customer information
     int num_customers = 0;
     char buffer[256];
     while (fgets(buffer, sizeof(buffer), customers_file) != NULL && num_customers < max_customers) {
-        // Analisar a linha
+        // Parse the line
         sscanf(buffer, "%d;%[^;];%[^;];%d", &customers[num_customers].id,
             customers[num_customers].name, customers[num_customers].telephone,
             &customers[num_customers].age);
@@ -75,20 +88,20 @@ int ReadCustomerFile(char* filename, Customer* customers, int max_customers) {
     return num_customers;
 }
 
-// Function para abrir e ler o "activity.txt" file
+// Function to open and read the "activity.txt" file
 int ReadActivityFile(char* filename, Activity* activities, int max_activities) {
-    // Abrir arquivo
+    // Open file
     FILE* activities_file = fopen(filename, "r");
     if (activities_file == NULL) {
         printf("Error opening activities file\n");
         return 0;
     }
 
-    // Ler as informações da activity
+    // Read activity information
     int num_activities = 0;
     char buffer[256];
     while (fgets(buffer, sizeof(buffer), activities_file) != NULL && num_activities < max_activities) {
-        // Analisar a linha
+        // Parse the line
         sscanf(buffer, "%d;%d-%d-%d;%d:%d;%[^;];%d;%d;%[^;]", &activities[num_activities].id,
             &activities[num_activities].date.day, &activities[num_activities].date.month,
             &activities[num_activities].date.year, &activities[num_activities].start_time.hour,
@@ -101,20 +114,20 @@ int ReadActivityFile(char* filename, Activity* activities, int max_activities) {
     return num_activities;
 }
 
-// Function para abrir e ler o "plan.txt" file
+// Function to open and read the "plan.txt" file
 int ReadPlanFile(char* filename, Plan* plans, int max_plans) {
-    // Abrir arquivo
+    // Open file
     FILE* plans_file = fopen(filename, "r");
     if (plans_file == NULL) {
         printf("Error opening plans file\n");
         return 0;
     }
 
-    // Ler as informações do plan
+    // Read plan information
     int num_plans = 0;
     char buffer[256];
     while (fgets(buffer, sizeof(buffer), plans_file) != NULL && num_plans < max_plans) {
-        // Analisar a linha
+        // Parse the line
         sscanf(buffer, "%d;%d-%d-%d;%d:%d;%d-%d-%d;%d:%d;%[^;];%d;%[^;]", &plans[num_plans].id,
             &plans[num_plans].start_date.day, &plans[num_plans].start_date.month, &plans[num_plans].start_date.year,
             &plans[num_plans].start_time.hour, &plans[num_plans].start_time.minute, &plans[num_plans].end_date.day,
@@ -130,12 +143,12 @@ int ReadPlanFile(char* filename, Plan* plans, int max_plans) {
 
 
 
-//Funções helpers
+// Helper functions
 
-//Function que compara as datas e os tempos
+// Function that compares dates and times
 int CompareDatesAndTimes(Date date1, Time time1, Date date2, Time time2) {
-    if (date1.year < date2.year) return -1;//date1 antes date2 (data anterior)
-    if (date1.year > date2.year) return 1;//date1 depois date2 (data posterior)
+    if (date1.year < date2.year) return -1;  // date1 before date2 (earlier date)
+    if (date1.year > date2.year) return 1;   // date1 after date2 (later date)
 
     if (date1.month < date2.month) return -1;
     if (date1.year == date2.year && date1.month > date2.month) return 1;
@@ -151,7 +164,8 @@ int CompareDatesAndTimes(Date date1, Time time1, Date date2, Time time2) {
 
     return 0;
 }
-// Function que pega SÓ o nome do costumer pelo ID
+
+// Function that gets only the customer name by ID
 char* GetCustomerName(int participant_id, Customer* customers, int num_customers) {
     
     for (int i = 0; i < num_customers; i++) {
@@ -165,9 +179,9 @@ char* GetCustomerName(int participant_id, Customer* customers, int num_customers
 
 
 
-// ex4 Function que conta quantos participantes fizeram X atividade fisica no periodo determinado
+// ex4 Function that counts how many participants performed X physical activity in the determined period
 int CountParticipants(Activity* activities, int num_activities) {
-    // Declara variaveis
+    // Declare variables
     Date start_date;
     Time start_time;
     Date end_date;
@@ -175,23 +189,23 @@ int CountParticipants(Activity* activities, int num_activities) {
     char activity_name[60];
     int count = 0;
 
-    // Prompt para o usuarios inserir nome da atividade
-    printf("Digite o nome da atividade: ");
+    // Prompt for user to enter activity name
+    printf("Enter activity name: ");
     scanf("%s", activity_name);
 
-    // Prompt para o usuarios inserir datas e horas
-    printf("Insira a data de início (dd/mm/yyyy): ");
+    // Prompt for user to enter dates and times
+    printf("Enter start date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &start_date.day, &start_date.month, &start_date.year);
-    printf("Insira o horário de início (hh:mm): ");
+    printf("Enter start time (hh:mm): ");
     scanf("%d:%d", &start_time.hour, &start_time.minute);
-    system("cls");
-    printf("Insira a data de término (dd/mm/yyyy): ");
+    system(CLEAR_SCREEN);
+    printf("Enter end date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &end_date.day, &end_date.month, &end_date.year);
-    printf("Insira o horário de término (hh:mm):");
+    printf("Enter end time (hh:mm): ");
     scanf("%d:%d", &end_time.hour, &end_time.minute);
 
 
-    // Verifica se as atividades estao dentro das datas dadas e conta 
+    // Check if activities are within the given dates and count them
     for (int i = 0; i < num_activities; i++) {
         Activity activity = activities[i];
         if (strcmp(activity.activity_name, activity_name) == 0 &&
@@ -204,31 +218,31 @@ int CountParticipants(Activity* activities, int num_activities) {
     return count;
 }
 
-// ex5 Function que lista os participantes que fizeram alguma atividade fisica no periodo determinado
+// ex5 Function that lists participants who performed some physical activity in the determined period
 void ListParticipants(Activity* activities, int num_activities, Customer* customers, int num_customers) {
-    // Declara variaveis
+    // Declare variables
     int start_day, start_month, start_year;
     int end_day, end_month, end_year;
     Date start_date, end_date;
 
-    // Prompt pro usuario introduzir as datas
-    printf("Insira a data de início (dd/mm/yyyy): ");
+    // Prompt for user to enter dates
+    printf("Enter start date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &start_day, &start_month, &start_year);
     start_date = (Date){ start_day, start_month, start_year };
 
-    printf("Insira a data de término (dd/mm/yyyy): ");
+    printf("Enter end date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &end_day, &end_month, &end_year);
     end_date = (Date){ end_day, end_month, end_year };
 
-    // Aloca espaço para activity_counts variable dando o vallor de num_costumers
+    // Allocate space for activity_counts variable with num_customers value
     int* activity_counts = malloc(sizeof(int) * num_customers);
 
-    // Cria uma array pra armazenar o contador de activity para cada customer
+    // Create an array to store the activity counter for each customer
     for (int i = 0; i < num_customers; i++) {
         activity_counts[i] = 0;
     }
 
-    // Conta o número de atividades que cada customer executou dentro do intervalo determinado
+    // Count the number of activities each customer performed within the determined interval
     for (int i = 0; i < num_activities; i++) {
         if (activities[i].date.year > start_date.year && activities[i].date.year < end_date.year) {
             activity_counts[activities[i].id]++;
@@ -241,16 +255,16 @@ void ListParticipants(Activity* activities, int num_activities, Customer* custom
         }
     }
 
-    // Classifique os customers em ordem decrescente por contagem de atividades
+    // Sort customers in descending order by activity count
     for (int i = 0; i < num_customers - 1; i++) {
         for (int j = i + 1; j < num_customers; j++) {
             if (activity_counts[i] < activity_counts[j]) {
-                //  Troca das contagens das activity
+                // Swap activity counts
                 int temp = activity_counts[i];
                 activity_counts[i] = activity_counts[j];
                 activity_counts[j] = temp;
 
-                // Troca dos customers
+                // Swap customers
                 Customer temp_customer = customers[i];
                 customers[i] = customers[j];
                 customers[j] = temp_customer;
@@ -259,58 +273,62 @@ void ListParticipants(Activity* activities, int num_activities, Customer* custom
     }
 
 
-    // Print da lista de customers
+    // Print customer list
     for (int i = 0; i < num_customers; i++) {
         printf("%d - %s - %d - %s\n", customers[i].id, customers[i].name, customers[i].age, customers[i].telephone);
     }
+
+    // Free allocated memory
+    free(activity_counts);
 }
 
-// ex6 Function que mostra os planos de X atividade fisica de X pessoa em X determinado intervalo de tempo
+// ex6 Function that shows plans for X physical activity of X person in X determined time interval
 void PresentActivity(Activity* activities, int num_activities, Plan* plans, int num_plans, Customer* customers, int num_customers) {
-    // Declara variaveis
+    // Declare variables
     char name[60];
     Date start_date;
     Time start_time;
     Date end_date;
     Time end_time;
-    char costumer[100];
+    char customer[100];
 
 
-    // Prompt pro usuario introduzir as informações
-    printf("Insira o tipo de atividade: ");
+    // Prompt for user to enter information
+    printf("Enter activity type: ");
     scanf("%s", name);
 
-    printf("Insira a data de início (dd/mm/yyyy): ");
+    printf("Enter start date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &start_date.day, &start_date.month, &start_date.year);
-    printf("Insira o horário de início (hh:mm): ");
+    printf("Enter start time (hh:mm): ");
     scanf("%d:%d", &start_time.hour, &start_time.minute);
 
-    system("cls");
-    printf("Insira a data de término (dd/mm/yyyy): ");
+    system(CLEAR_SCREEN);
+    printf("Enter end date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &end_date.day, &end_date.month, &end_date.year);
-    printf("Insira o horário de término (hh:mm): ");
+    printf("Enter end time (hh:mm): ");
     scanf("%d:%d", &end_time.hour, &end_time.minute);
 
-    system("cls");
-    printf("Insira o nome do praticante: ");
-    scanf("%s", costumer);
+    system(CLEAR_SCREEN);
+    printf("Enter participant name: ");
+    scanf("%s", customer);
 
-    system("cls");
+    system(CLEAR_SCREEN);
 
-    //print inicial
-    printf("Plano de atividade do tipo %s de %02d-%02d-%04d %02d:%02d até %02d-%02d-%04d %02d:%02d para o praticante %s:\n",
+    // Initial print
+    printf("Activity plan of type %s from %02d-%02d-%04d %02d:%02d to %02d-%02d-%04d %02d:%02d for participant %s:\n",
         name, start_date.day, start_date.month, start_date.year, start_time.hour, start_time.minute,
-        end_date.day, end_date.month, end_date.year, end_time.hour, end_time.minute, costumer);
-    //Verifica de acordo com a quantidade de planos que o cliente tem
+        end_date.day, end_date.month, end_date.year, end_time.hour, end_time.minute, customer);
+    
+    // Check according to the number of plans the client has
     for (int i = 0; i < num_plans; i++) {
-        //pega o nome do customer pelo ID usando a funçao GetCustomerName
-        char* costumer_name = GetCustomerName(plans[i].id, customers, num_customers);
-        //valida as informações
+        // Get customer name by ID using GetCustomerName function
+        char* customer_name = GetCustomerName(plans[i].id, customers, num_customers);
+        // Validate information
         if (strcmp(plans[i].activity_name, name) == 0 &&
             CompareDatesAndTimes(start_date, start_time, plans[i].start_date, plans[i].start_time) <= 0 &&
             CompareDatesAndTimes(plans[i].end_date, plans[i].end_time, end_date, end_time) <= 0 &&
-            strcmp(costumer_name, costumer) == 0) {
-            printf("%d. %02d-%02d-%04d %02d:%02d até %02d-%02d-%04d %02d:%02d, distância %d %s\n",
+            strcmp(customer_name, customer) == 0) {
+            printf("%d. %02d-%02d-%04d %02d:%02d to %02d-%02d-%04d %02d:%02d, distance %d %s\n",
                 plans[i].id, plans[i].start_date.day, plans[i].start_date.month, plans[i].start_date.year,
                 plans[i].start_time.hour, plans[i].start_time.minute,
                 plans[i].end_date.day, plans[i].end_date.month, plans[i].end_date.year,
@@ -318,61 +336,61 @@ void PresentActivity(Activity* activities, int num_activities, Plan* plans, int 
                 plans[i].distance, plans[i].units);
         }
         else{   
-            printf("ERROR! Cliente Inexistente!");
+            printf("ERROR! Non-existent Client!");
         }
     }
 }
 
-// ex7 Function que calcula o tempo que demora cada atividade num determinadoperiodo de tempo pra um X cliente
+// ex7 Function that calculates the time each activity takes in a determined period for a specific client
 void CalcActivitysTime(Customer* customers, int num_customers, Activity* activities, int num_activities) {
-    // Declaração de variáveis
+    // Variable declaration
     int i, j;
     Date start_date, end_date;
     Time start_time, end_time;
     int customer_id, total_time, avg_time;
     char customer_name[100];
 
-    // Perguntar ao usuário pelo nome do cliente
-    printf("Insira o nome do cliente: ");
+    // Ask user for client name
+    printf("Enter client name: ");
     scanf("%s", customer_name);
 
-    // Perguntar ao usuário pelas informações de data e hora
-    printf("Insira a data de início (dd/mm/yyyy): ");
+    // Ask user for date and time information
+    printf("Enter start date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &start_date.day, &start_date.month, &start_date.year);
-    printf("Insira o horário inicio (hh:mm): ");
+    printf("Enter start time (hh:mm): ");
     scanf("%d:%d", &start_time.hour, &start_time.minute);
-    system("cls");
-    printf("Insira a data de término (dd/mm/yyyy): ");
+    system(CLEAR_SCREEN);
+    printf("Enter end date (dd/mm/yyyy): ");
     scanf("%d/%d/%d", &end_date.day, &end_date.month, &end_date.year);
-    printf("Insira o horário de término (hh:mm): ");
+    printf("Enter end time (hh:mm): ");
     scanf("%d:%d", &end_time.hour, &end_time.minute);
 
-    // Percorrer a lista de clientes
+    // Go through the client list
     for (i = 0; i < num_customers; i++) {
-        // Inicializar a variável de tempo total
+        // Initialize total time variable
         total_time = 0;
 
-        // Verificar se o nome do cliente é ígual ao especificado pelo usuário
+        // Check if client name equals the one specified by user
         if (strcmp(customers[i].name, customer_name) == 0) {
             customer_id = customers[i].id;
 
-            // Percorrer a lista de atividades
+            // Go through the activity list
             for (j = 0; j < num_activities; j++) {
-                // Verificar se a atividade ocorreu durante o período especificado pelo usuário
-                // e se o cliente participou da atividade
+                // Check if activity occurred during the period specified by user
+                // and if the client participated in the activity
                 if (customers[i].id == activities[j].id &&
-                    CompareDatesAndTimes(start_date, start_time, end_date, end_time,
-                        activities[j].date, activities[j].start_time) == 0) {
-                    // Adicionar o tempo da atividade ao tempo total
+                    CompareDatesAndTimes(activities[j].date, activities[j].start_time, start_date, start_time) >= 0 &&
+                    CompareDatesAndTimes(activities[j].date, activities[j].start_time, end_date, end_time) <= 0) {
+                    // Add activity time to total time
                     total_time += activities[j].duration;
                 }
             }
 
-            // Calcular o tempo médio
+            // Calculate average time
             avg_time = total_time / num_activities;
-            // Imprimir o tempo total e o tempo médio para o cliente
-            printf("Cliente %s: tempo total = %d minutos, tempo médio = %d minutos\n",
-                GetCustomerName(customers, num_customers, customer_id), total_time, avg_time);
+            // Print total time and average time for the client
+            printf("Client %s: total time = %d minutes, average time = %d minutes\n",
+                GetCustomerName(customer_id, customers, num_customers), total_time, avg_time);
         }
     }
 }
@@ -383,78 +401,78 @@ void CalcActivitysTime(Customer* customers, int num_customers, Activity* activit
 
 int main(int argc, char** argv) {
 
-    //setlocale para usar acentuação
+    // setlocale to use accentation
     setlocale(LC_ALL, "");
-    //variavel de escolha começando em uma impossivel
+    // choice variable starting with an impossible value
     int choice = -1;
 
 
-    //Lê as 3 informações dos 3 files
-    // Ler as informações da "Customer.txt" file
+    // Read the 3 information from the 3 files
+    // Read information from "Customer.txt" file
     Customer customers[100];
     int num_customers = ReadCustomerFile("customer.txt", customers, 100);
 
-    // Ler as informações da "Activity.txt" file
+    // Read information from "Activity.txt" file
     Activity activities[100];
     int num_activities = ReadActivityFile("activity.txt", activities, 100);
 
-    // Ler as informações da "Plan.txt" file
+    // Read information from "Plan.txt" file
     Plan plans[100];
     int num_plans = ReadPlanFile("plan.txt", plans, 100);
 
 
-    //iniciar programa aparente
+    // Start apparent program
     do
     {
 
-        //mostrar opções
-        system("cls");
+        // Show options
+        system(CLEAR_SCREEN);
         printf( "\n -----------------------------------"
-                "\n | 1 - Procurar atividade          |"
-                "\n | 2 - Listar participantes        |"
-                "\n | 3 - Mostrar Plano de Atividade  |"
-                "\n | 4 - Calcular Tempo de Atividade |"
-                "\n | 0 - Sair                        |"
+                "\n | 1 - Search activity             |"
+                "\n | 2 - List participants           |"
+                "\n | 3 - Show Activity Plan          |"
+                "\n | 4 - Calculate Activity Time     |"
+                "\n | 0 - Exit                        |"
                 "\n -----------------------------------"
-                "\n > Escolha a sua opcao: ");
+                "\n > Choose your option: ");
 
-        scanf_s("%d", &choice);
+        SCANF_FUNC("%d", &choice);
 
 
-        //escolher entre as opções
+        // Choose between options
         switch (choice)
         {
         case 1:
-            system("cls");
-            printf("Número de clientes encontrados: %d", CountParticipants(activities, num_activities));
-            system("pause > nul");
+            system(CLEAR_SCREEN);
+            printf("Number of clients found: %d", CountParticipants(activities, num_activities));
+            system(PAUSE_COMMAND);
             break;
         case 2:
-            system("cls");
+            system(CLEAR_SCREEN);
             ListParticipants(activities, num_activities, customers, num_customers);
-            system("pause > nul");
+            system(PAUSE_COMMAND);
             break;
         case 3:
-            system("cls");
+            system(CLEAR_SCREEN);
             PresentActivity(activities, num_activities, plans, num_plans, customers, num_customers);
-            system("pause > nul");
+            system(PAUSE_COMMAND);
             break;
         case 4:
-            system("cls");
+            system(CLEAR_SCREEN);
             CalcActivitysTime(customers, num_customers, activities, num_activities);
-            system("pause > nul");
+            system(PAUSE_COMMAND);
             break;
         case 0:
             exit(0);
             break;
         default:
 
-            //caso opção não exista
-            system("cls");
+            // If option doesn't exist
+            system(CLEAR_SCREEN);
             printf("\n ------------------"
-                   "\n | Opcao invalida |"
+                   "\n | Invalid option |"
                    "\n ------------------");
-            system("pause > nul");
+            system(PAUSE_COMMAND);
             break;
 
         }
